@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>KADR · 2mriky</title>
+<link rel="stylesheet" href="styles.css?v=4">
+</head>
+<body>
+
+<header class="top">
+  <div class="brand"><span class="dot"></span><b>KADR</b><span>· by 2mriky</span></div>
+  <div class="proj" id="proj" style="display:none">
+    <span id="projName"></span>
+    <span class="save" id="saveState"></span>
+  </div>
+  <div class="actions" id="actions" style="display:none">
+    <button class="ghost" id="btnUndo" title="تراجع (⌘Z)">↶</button>
+    <button class="ghost" id="btnRedo" title="إعادة (⇧⌘Z)">↷</button>
+    <button class="ghost" id="btnSaveAs">احفظ كنسخة</button>
+    <button class="ghost" id="btnClaude" title="ينسخ رسالة تبعتها لـ Claude">رندر عند Claude</button>
+    <button class="cu" id="btnExport">Export MP4</button>
+  </div>
+</header>
+
+<!-- start screen -->
+<section class="start" id="start">
+  <div class="card">
+    <div class="mark">▶</div>
+    <h1>افتح فولدر الريل</h1>
+    <p>الفولدر اللي فيه <code>reel.json</code>. الصور والفيديوهات بتتقري من جهازك ومفيش حاجة بتترفع.</p>
+    <button class="cu big" id="btnOpen">افتح فولدر</button>
+    <button class="ghost big" id="btnResume" style="display:none"></button>
+    <p class="warn" id="noFs" style="display:none">المتصفح ده مش بيدعم فتح الفولدرات. افتح الصفحة من <b>Google Chrome</b> على اللابتوب (الموبايل مابيدعمهاش).</p>
+  </div>
+</section>
+
+<!-- choose json when the folder has more than one -->
+<section class="start" id="chooser" style="display:none">
+  <div class="card"><h1>أنهي نسخة؟</h1><div class="list" id="chooseList"></div></div>
+</section>
+
+<main class="app" id="app" style="display:none">
+  <aside class="panel">
+    <nav class="tabs">
+      <button data-tab="scene" class="on">المشهد</button>
+      <button data-tab="brand">البراند</button>
+    </nav>
+    <div class="pbody" id="pbody"></div>
+  </aside>
+
+  <section class="stage">
+    <div class="screen" id="screen">
+      <canvas id="cv"></canvas>
+      <div class="safe" id="safe" style="display:none">
+        <div class="s-top">منطقة واجهة إنستجرام</div>
+        <div class="s-bot">الكابشن والأزرار</div>
+        <div class="s-side"></div>
+      </div>
+    </div>
+    <div class="transport">
+      <button class="play" id="btnPlay" title="تشغيل (مسافة)">▶</button>
+      <span class="time"><b id="tNow">0:00.0</b> / <span id="tDur">0:00.0</span></span>
+      <span class="grow"></span>
+      <button class="chip" id="btnSafe" title="S">المنطقة الآمنة</button>
+    </div>
+  </section>
+
+  <footer class="timeline">
+    <div class="track" id="track"><div class="head" id="playhead"></div></div>
+    <div class="hidden" id="hiddenRow"></div>
+  </footer>
+</main>
+
+<div class="modal" id="modal" style="display:none"><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast" style="display:none"></div>
+
+<script src="vendor/mp4-muxer.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="vendor/icons.js"></script>
+<script src="vendor/lottie_canvas.min.js"></script>
+<script src="engine.js?v=4"></script>
+<script src="app.js?v=4"></script>
+</body>
+</html>
