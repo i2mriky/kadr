@@ -10,7 +10,7 @@ const S={dir:null,file:'reel.json',reel:null,images:{},urls:{},videos:{},eng:nul
 // ---------- scene types: Arabic name + editable fields ----------
 const TYPE_NAME={shot:'لقطة فيديو',titleCard:'كارت عنوان',bigStat:'رقم كبير',ctaCard:'تواصل / CTA',hookPullback:'هوك — سحب للخلف',pressToClip:'ضغطة ← فيديو',bentoThree:'بنتو 3 كروت',loupe:'عدسة',
   clipFull:'فيديو كامل',coloursOnBeat:'ألوان على البيت',bentoPick:'اختار لونك',filmstrip:'شريط صور',outro:'أوتـرو',
-  searchUI:'بحث (واجهة)',cards3D:'كروت 3D',mapPin:'خريطة + دبوس',iconGrid:'أيقونات (كيبورد)',planCard:'كارت سداد 3D'};
+  talk:'كلام + جرافيك',searchUI:'بحث (واجهة)',cards3D:'كروت 3D',mapPin:'خريطة + دبوس',iconGrid:'أيقونات (كيبورد)',planCard:'كارت سداد 3D'};
 // timings that belong to the END of a scene: they move with the duration
 const END_ANCHORED={_:[['text','exit']],bentoThree:[['morphAt',0],['morphAt',1]],bentoPick:[['exitAt']],pressToClip:[]};
 const TRANS=[['cut','قطع مباشر'],['slam','سلام (زووم في الكاميرا)'],['glitch','جليتش'],['iris','آيرس «لمسة»'],['match','ماتش-بوش (زووم جوه تفصيلة)'],['whip','ويب (يمين)'],['push','بوش (لفوق)'],['flash','فلاش']];
@@ -132,6 +132,7 @@ function setDur(d,nd,commit=true){const delta=nd-d.dur; d.dur=+nd.toFixed(2);
   if(commit)afterEdit(); else { S.eng=makeEngine($('cv'),PREVIEW_SCALE,1); paint(); }}
 function moveScene(dir){const i=S.sel,j=i+dir,A=S.reel.scenes;if(j<0||j>=A.length)return;edit(()=>{[A[i],A[j]]=[A[j],A[i]];S.sel=j;});selectScene(j);}
 const NEW_SCENE={
+  talk:()=>({type:'talk',dur:4,clip:Object.keys(S.reel.clips||{})[0]||'',g:{kind:'line',at:.3,text:{words:[{w:'سطر'},{w:'جديد',red:true}],size:140},sub:''},lines:[]}),
   searchUI:()=>({type:'searchUI',dur:4.4,bg:'dark',kicker:'',headline:{words:[{w:'لاقي'},{w:'بيتك',red:true}],y:420,size:112},window:'Search',placeholder:'دوّر…',query:'اكتب البحث هنا',typeAt:.45,cps:20,filters:['فلتر ١','فلتر ٢'],clickAt:2.3,statusAt:2.55,status:[{t:'بنحلّل {n} نتيجة',count:1000},{t:'أفضل تطابق',tag:'98%'}]}),
   cards3D:()=>({type:'cards3D',dur:3.4,bg:'dark',pickAt:1.55,text:{words:[{w:'النتيجة'},{w:'الأفضل',red:true}],y:300,size:96,exit:1.9},cards:[0,1,2,3,4].map(i=>({img:Object.keys(S.reel.assets)[i%Object.keys(S.reel.assets).length],title:'عنوان '+(i+1),place:'',price:'',tags:[],hero:i===2}))}),
   mapPin:()=>({type:'mapPin',dur:4.2,pin:{pos:[.53,.56],title:'اسم المكان',sub:''},pinAt:1.5,roads:[{name:'شارع رئيسي',pts:[[0,.62],[1,.6]],w:34}],landmarks:[{name:'مَعلَم',time:'٥ د',pos:[.6,.49]}],text:{words:[{w:'الموقع'}],y:330,size:96,exit:3.8},tin:{type:'whip',dur:.32}}),
@@ -177,6 +178,16 @@ function renderPanel(){const P=$('pbody');if(!S.reel)return;
 const sec=(P,title)=>{const s=el('div','sec');if(title)s.appendChild(el('h3',null,title));P.appendChild(s);return s;};
 const row=(parent,label,...ctl)=>{const r=el('div','row');r.appendChild(el('label',null,label));const c=el('div','ctl');ctl.forEach(x=>c.appendChild(x));r.appendChild(c);parent.appendChild(r);return r;};
 function textIn(obj,key,{dk,ph}={}){const i=el('input','in');i.type='text';i.value=obj[key]??'';i.dataset.key=dk||key;if(ph)i.placeholder=ph;i.oninput=()=>edit(()=>{obj[key]=i.value;});return i;}
+const GKEY={kind:'نوع الجرافيك',text:'الكلام',title:'العنوان',kicker:'سطر صغير',place:'المكان',pill:'البادج',stamp:'الرقم الكبير',stampTop:'فوق الرقم',query:'جملة البحث',answer:'الرد',label:'العنوان',result:'النتيجة',no:'الاختيار الغلط',yes:'الاختيار الصح',value:'الرقم',unit:'الوحدة',sub:'سطر تحت',app:'اسم الأبلكيشن',toast:'رسالة التأكيد',head:'العنوان',badge:'البادج',line:'السطر',phone:'التليفون',done:'بعد الضغط',yearsLabel:'سطر السنين',years:'عدد السنين',items:'العناصر',ticks:'العلامات',tags:'تاجز',icon:'أيقونة',headIcon:'أيقونة',pillIcon:'أيقونة',at:'يظهر عند',clickAt:'الضغطة',pickAt:'الاختيار',tapAt:'الضغطة',pressAt:'الضغطة',titleAt:'العنوان يظهر',titleEnd:'العنوان يختفي',stampAt:'الختم يظهر',stampEnd:'الختم يختفي',slideAt:'السلايدر يبدأ',yearsAt:'السنين تظهر',countDur:'مدة العد',moveDur:'مدة الحركة'};
+const GKINDS=[['hook','هوك (ختم + عنوان)'],['search','بحث + ماوس'],['budget','سلايدر ميزانية'],['versus','اختيار بين اتنين'],['counter','عدّاد كبير'],['line','سطر كبير'],['chip','بادجات'],['phone','موبايل + أبلكيشن'],['checklist','شيك ليست'],['units','سلايدر وحدات'],['offer','عرض + تقسيط'],['cta','احجز / تواصل'],['none','من غير جرافيك']];
+function autoFields(P,title,o){ const s=sec(P,title); Object.keys(o).forEach(k=>{ const v=o[k], L=GKEY[k]||k;
+  if(k==='kind'){row(s,L,selectIn(o,'kind',GKINDS));s.lastChild.querySelector('select').addEventListener('change',()=>renderPanel());return;}
+  if(typeof v==='string')row(s,L,textIn(o,k,{dk:'g_'+k}));
+  else if(typeof v==='number')row(s,L,numIn(o,k,{min:0,max:/At$|Dur|End$/.test(k)?60:100000,step:/At$|Dur|End$/.test(k)?.05:1,dk:'g_'+k}));
+  else if(Array.isArray(v)&&v.every(x=>typeof x==='string'))row(s,L,csvIn(o,k,{dk:'g_'+k}));
+  else if(v&&!Array.isArray(v)&&typeof v==='object'&&v.words)wordsIn(P,v,L);
+  else if(Array.isArray(v))v.forEach((it,n)=>{const b=el('div','item');Object.keys(it).forEach(kk=>{if(typeof it[kk]==='string')row(b,(GKEY[kk]||kk)+' '+(n+1),textIn(it,kk,{dk:'g_'+k+n+kk}));else if(typeof it[kk]==='number')row(b,(GKEY[kk]||kk),numIn(it,kk,{min:0,max:60,step:.05,dk:'g_'+k+n+kk}));});s.appendChild(b);});
+}); }
 function csvIn(obj,key,{dk}={}){const i=el('input','in');i.type='text';i.value=(obj[key]||[]).join('، ');i.dataset.key=dk||key;i.placeholder='افصل بفاصلة';i.oninput=()=>edit(()=>{obj[key]=i.value.split(/[،,]/).map(x=>x.trim()).filter(Boolean);});return i;}
 function numIn(obj,key,{min=0,max=99,step=.1,unit='',dk}={}){const w=el('div','num');const i=el('input');i.type='text';i.inputMode='decimal';i.dataset.key=dk||key;
   const dec=(String(step).split('.')[1]||'').length;if(obj[key]==null||isNaN(+obj[key]))obj[key]=min;const show=()=>{i.value=(+obj[key]).toFixed(dec);};show();
@@ -244,6 +255,9 @@ function scenePanel(P){const d=S.reel.scenes[S.sel];if(!d){P.appendChild(el('div
         row(s,'تغميق فوق',selectIn(d,'scrim',[['dark','غامق'],['paper','ورق فاتح'],['none','من غير']]));}
       if(!d.chip)d.chip={text:'',at:.3}; {const s=sec(P,'بادج صغير تحت (اسم الأوضة مثلاً)');s.appendChild(textIn(d.chip,'text',{dk:'chip'}));row(s,'أيقونة',textIn(d.chip,'icon',{dk:'chipi',ph:'sofa / bed-double …'}));const gb=el('button','toggle',d.chip.glass?'✓ زجاج':'زجاج');gb.onclick=()=>edit(()=>{d.chip.glass=!d.chip.glass;renderPanel();});row(s,'الشكل',gb);}
       if(!d.text){const b=el('button','toggle','＋ عنوان فوق');b.onclick=()=>edit(()=>{d.text={words:[{w:'عنوان'}],y:430,size:140,fx:'hl'};renderPanel();});sec(P,'').appendChild(b);} break;
+    case 'talk': clipSel('clip','الفيديو');
+      listItems(P,'الكابشن (اكتب الكلام صح)',d.lines||[],(b,l,n)=>{row(b,'سطر '+(n+1),textIn(l,'text',{dk:'ln'+n}));row(b,'من',numIn(l,'at',{min:0,max:d.dur,step:.05,unit:'ث',dk:'la'+n}),numIn(l,'end',{min:0,max:d.dur,step:.05,unit:'ث',dk:'le'+n}));});
+      if(!d.g)d.g={kind:'none'}; autoFields(P,'الجرافيك',d.g); break;
     case 'searchUI': {const s=sec(P,'البحث');row(s,'جملة البحث',textIn(d,'query',{dk:'q'}));row(s,'قبل الكتابة',textIn(d,'placeholder',{dk:'ph'}));row(s,'سطر فوق',textIn(d,'kicker',{dk:'kk'}));row(s,'الفلاتر',csvIn(d,'filters',{dk:'fl'}));
         row(s,'يبدأ يكتب',numIn(d,'typeAt',{min:0,max:d.dur,step:.05,unit:'ث'}));row(s,'سرعة الكتابة',numIn(d,'cps',{min:6,max:60,step:1,unit:'حرف/ث'}));row(s,'الضغطة',numIn(d,'clickAt',{min:.5,max:d.dur,step:.05,unit:'ث'}));row(s,'التحليل يبدأ',numIn(d,'statusAt',{min:.5,max:d.dur,step:.05,unit:'ث'}));}
       listItems(P,'سطور التحليل ({n} = عدّاد)',d.status||[],(b,r,n)=>{row(b,'سطر '+(n+1),textIn(r,'t',{dk:'st'+n}));row(b,'علامة يسار',textIn(r,'tag',{dk:'sg'+n}));if(r.count!=null)row(b,'العدّاد',numIn(r,'count',{min:0,max:1e7,step:1,dk:'sc'+n}));}); break;
